@@ -35,4 +35,4 @@ $ docker pull codelysis/linuxalpine
 
 ## Usage
 
-```You can now run `$ python3 ./main.py` to start the program and everything should work. If any problems, please open a GitHub issue.
+You can now run `$ python3 ./main.py` to start the program and everything should work. If any problems, please open a GitHub issue.
