@@ -1,12 +1,26 @@
-import codelyse,os,json,flask,requests,re
-from flask import request, jsonify
+import codelyse,os,json,flask,requests,re,magic
+from urllib.parse import urlparse
+from flask import request, jsonify, render_template, Response
 from lxml.html import parse
 from bs4 import BeautifulSoup
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, static_url_path='')
 app.config["DEBUG"] = True
 
+def getMime(url):
+	if url.endswith('css'):
+		return 'text/css'
+	elif url.endswith('html'):
+		return 'text/html'
+	elif url.endswith('js'):
+		url.endswith('text/javascript')
+	return magic.from_file(url, mime=True)
 
+def e_send_from_directory(folder,file):
+	with open(str(folder)+str(file),'r') as f:
+		content = f.read()
+		f.close()
+	return content 
 
 def get_title(url):
 	page = requests.get(url).content
@@ -21,6 +35,19 @@ def home():
 		f.close()
 	return page
 
+@app.errorhandler(404)
+def send_static(*args):
+	try:
+		ret = e_send_from_directory('html', urlparse(request.url).path)
+		resp = Response(response=ret,
+	                    status=200,
+	                    mimetype=getMime('html'+str(urlparse(request.url).path)))
+		print(getMime('html'+str(urlparse(request.url).path)))
+		return resp
+	except:
+		return Response(response='Not Found / 404',
+	                    status=404,
+	                    mimetype='text/html')
 
 @app.route('/api/v1/get_title', methods=['GET','POST'])
 def api_get_title():
