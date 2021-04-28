@@ -15,10 +15,12 @@ def getMime(url):
 		return 'text/html'
 	elif url.endswith('js'):
 		url.endswith('text/javascript')
+	elif url.endswith('gif'):
+		url.endswith('image/gif')
 	return magic.from_file(url, mime=True)
 
 def e_send_from_directory(folder,file):
-	with open(str(folder)+str(file),'r') as f:
+	with open(str(folder)+'/'+str(file),'rb') as f:
 		content = f.read()
 		f.close()
 	return content 
@@ -45,8 +47,9 @@ def send_static(*args):
 	                    mimetype=getMime('html'+str(urlparse(request.url).path)))
 		print(getMime('html'+str(urlparse(request.url).path)))
 		return resp
-	except:
-		return Response(response='Not Found / 404',
+	except Exception as e:
+		print(e)
+		return Response(response=f'{urlparse(request.url).path} Not Found / 404',
 	                    status=404,
 	                    mimetype='text/html')
 
