@@ -1,10 +1,12 @@
-import codelysis,os,json,flask,requests,re,magic,concurrent.futures,uuid
+import codelysis,os,json,flask,requests,re,magic,concurrent.futures,uuid,logging
 from urllib.parse import urlparse
 from flask import request, jsonify, render_template, Response
 from lxml.html import parse
 from bs4 import BeautifulSoup
 
 app = flask.Flask(__name__, static_url_path='')
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 app.config["DEBUG"] = True
 threads = {}
 
@@ -45,10 +47,9 @@ def send_static(*args):
 		resp = Response(response=ret,
 	                    status=200,
 	                    mimetype=getMime('html'+str(urlparse(request.url).path)))
-		print(getMime('html'+str(urlparse(request.url).path)))
 		return resp
 	except Exception as e:
-		print(e)
+		print(f"[*] {e}")
 		return Response(response=f'{urlparse(request.url).path} Not Found / 404',
 	                    status=404,
 	                    mimetype='text/html')
@@ -68,18 +69,21 @@ def api_get_title():
 
 
 
-def analyse(code):
-	error,trace = codelysis.analyse(code)
+def analyse(code,jobid):
+	error,trace = codelysis.analyse(code,jobid)
 
-	links,query = codelysis.getlinks(error,template='stackoverflow.com') #1 == accurate
+	print(f"[*] Finished Analysis for ({jobid})")
 
 	broken=None
 	lineno=None
 	filename=None
 	if len(error) < 1:
-		broken = False
-		print('codes works perfectly fine')
+		print('[*] codes works perfectly fine')
+		print(f"[*] Api Finished for ({jobid})")
+		return {'status':0,'broken':False,'links':None,'query':None,'error':None,'lineno':None}
 	else:
+		links,query = codelysis.getlinks(error,template='stackoverflow.com') #1 == accurate
+		print(f"[*] Finished Link Retrieval for ({jobid})")
 		broken = True
 		lineno = trace['lineno']
 		filename = trace['filename']
@@ -102,6 +106,8 @@ def analyse(code):
 
 	# Use the jsonify function from Flask to convert our list of
 	# Python dictionaries to the JSON format.
+
+	print(f"[*] Api Finished for ({jobid})")
 	return {'status':0,'broken':broken,'links':linksdetails,'query':query,'error':error,'lineno':lineno}
 
 @app.route('/api/v1/analyse', methods=['GET','POST'])
@@ -122,7 +128,8 @@ def api_analyse():
 
 	executor = concurrent.futures.ThreadPoolExecutor() 
 	jobid = str(uuid.uuid4().hex)[:10]
-	threads[jobid] = executor.submit(analyse, code)
+	print(f"\n\n[*] Started New Job (JOBID = {jobid})")
+	threads[jobid] = executor.submit(analyse, code, jobid)
 	return {'status':0,'job':jobid}
 
 

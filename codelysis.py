@@ -79,9 +79,9 @@ def getlinks(error,template=0):
 def sessid(length):
     return random.randint(10**(length-1), 10**length-1)
 
-def analyse(pythoncode):
-	sess = sessid(5)
-	print(sess)
+def analyse(pythoncode,jobid):
+	sess = jobid
+	print(f"[*] Started Processing {(sess)}")
 	try:
 		os.makedirs(f"{home}/.tmp/pysess/{sess}/main/") 
 	except:
@@ -97,7 +97,7 @@ def analyse(pythoncode):
 		requirement_file = open (f'{home}/.tmp/pysess/{sess}/main/requirements.txt', 'r' )
 		content = requirement_file.read()
 		contents = re.sub(r"==.*$", "", content, flags = re.M)
-		print(contents)
+		#print(contents)
 		requirement_file.close()
 		requirement_file = open (f'{home}/.tmp/pysess/{sess}/main/requirements.txt', 'w')
 		requirement_file.write(contents)
@@ -121,7 +121,7 @@ def analyse(pythoncode):
 			error = trace[0]
 			stacktrace = trace[1]
 
-			print(trace)
+			print(f"[*] Error for ({jobid}): {trace}")
 			
 		except Exception as e:
 			print(e)
