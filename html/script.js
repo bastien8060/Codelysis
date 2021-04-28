@@ -82,7 +82,9 @@ function checkjob(client_job) {
 
             if (status == "Finished") {
                 clearInterval(client_job);
-                jobresult()
+                setTimeout(function() {
+                    jobresult()
+                }, 800);
             }
 
 
