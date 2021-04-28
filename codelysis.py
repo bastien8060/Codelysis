@@ -123,6 +123,7 @@ exec(base64.b64decode("aW1wb3J0IGJ1aWx0aW5zCmRlZiBmYWtlX2lucHV0KCprd2FyZ3MpOgoJc
 			trace = pickle.load(open(f'{home}/.tmp/pysess/{sess}/main/codelysis-trace.log','rb'))
 			error = trace[0]
 			stacktrace = trace[1]
+			stacktrace['lineno'] = int(stacktrace['lineno']) - 2
 
 			print(f"[*] Error for ({jobid}): {trace}")
 			
