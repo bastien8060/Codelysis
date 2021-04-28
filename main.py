@@ -6,8 +6,6 @@ from bs4 import BeautifulSoup
 
 
 class CustomFormatter(logging.Formatter):
-    """Logging Formatter to add colors and count warning / errors"""
-
     grey = "\x1b[38;21m"
     yellow = "\x1b[33;21m"
     red = "\x1b[31;21m"
@@ -101,8 +99,10 @@ def api_get_title():
 
 
 def analyse(code,jobid):
+	threads[jobid]['status'] = 'Analysing'
 	error,trace = codelysis.analyse(code,jobid)
 
+	threads[jobid]['status'] = 'Finished Analysis'
 	print(f"[*] Finished Analysis for ({jobid})")
 
 	broken=None
@@ -113,6 +113,7 @@ def analyse(code,jobid):
 		print(f"[*] Api Finished for ({jobid})")
 		return {'status':0,'broken':False,'links':None,'query':None,'error':None,'lineno':None}
 	else:
+		threads[jobid]['status'] = 'Fetching Links'
 		links,query = codelysis.getlinks(error,template='stackoverflow.com') #1 == accurate
 		print(f"[*] Finished Link Retrieval for ({jobid})")
 		broken = True
@@ -138,6 +139,7 @@ def analyse(code,jobid):
 	# Use the jsonify function from Flask to convert our list of
 	# Python dictionaries to the JSON format.
 
+	threads[jobid]['status'] = 'Done'
 	print(f"[*] Api Finished for ({jobid})")
 	return {'status':0,'broken':broken,'links':linksdetails,'query':query,'error':error,'lineno':lineno}
 
@@ -160,7 +162,9 @@ def api_analyse():
 	executor = concurrent.futures.ThreadPoolExecutor() 
 	jobid = str(uuid.uuid4().hex)[:10]
 	print(f"\n\n[*] Started New Job (JOBID = {jobid})")
-	threads[jobid] = executor.submit(analyse, code, jobid)
+	threads[jobid] = {}
+	threads[jobid]['status'] = 'Starting...'
+	threads[jobid]['instance'] = executor.submit(analyse, code, jobid)
 	return {'status':0,'job':jobid}
 
 
@@ -172,9 +176,9 @@ def job_done():
 		print(request.args)
 		return {'status':1,'msg':'Error: No id field provided. Please specify a job id.'}
 
-	if threads[jobid].done():
-		return {'status':'Finished'}
-	return {'status':'Running'}
+	if threads[jobid]['instance'].done():
+		return {'status':'Finished','msg':'Done'}
+	return {'status':'Running','msg':threads[jobid]['status']}
 
 @app.route('/api/v1/job_result',methods=['GET','POST'])	
 def job_result():
@@ -184,7 +188,7 @@ def job_result():
 		print(request.args)
 		return {'status':1,'msg':'Error: No id field provided. Please specify a job id.'}
 
-	future = threads[jobid]
+	future = threads[jobid]['instance']
 	return future.result()
 
 app.run(host='0.0.0.0', port=8080)
