@@ -36,3 +36,7 @@ $ docker pull codelysis/linuxalpine
 ## Usage
 
 You can now run `$ python3 ./main.py` to start the program and everything should work. If any problems, please open a GitHub issue.
+
+Codelysis uses Google's Search API, which isn't totally free. To use this project, you will need to add an API key in the file `apiconfigs.py` to use this without limit. By kindness, I added two API keys (125 requests/month in total) from scaleserp.com which provides a similar service as google's api. 
+
+Refer to this [wiki](https://github.com/bastien8060/Codelysis/wiki/Create-a-Google-Search-Api-key) to create a free Google Api Key.
