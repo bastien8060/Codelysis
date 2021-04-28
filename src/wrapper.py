@@ -1,7 +1,7 @@
 import os,sys,pickle
 def logtrace(msg,trace):
 	msg = str(msg)
-	if trace['filename'] == '/root/user.py':
+	if trace['filename'] == '/oroot/user.py':
 		trace['filename'] = 'main.py'
 	with open('codelysis-trace.log','wb') as f:
 		content = [msg,trace]

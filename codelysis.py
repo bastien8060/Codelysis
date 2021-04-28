@@ -16,17 +16,17 @@ def google_search(search_term, api_key, cse_id, **kwargs):
 def serp(query):
 	ret = []
 	try:
-		received = Falsef
+		received = False
 		attempts = 0
 		for key in keys['scaleserp']['keys']:
 			try:
 				print(f'trying {key}')
 				s = json.loads(requests.get(f'https://api.scaleserp.com/search?api_key={key}&q={query}&hl=en').content.decode())
 				if 'organic_results' not in s:
-					print("0 Results")
+					print(f"0 Results for {s}")
 					return []
 				for i in s['organic_results']:
-					ret.append({'title':i['title'],'link':i['link']})
+					ret.append({'api':'scaleserp','title':i['title'],'link':i['link']})
 					received = True
 				return ret
 			except Exception as e:
@@ -37,8 +37,8 @@ def serp(query):
 				pass
 		if received == False:
 			raise Exception('No Serp api keys worked.')
-	except:
-		print('No Serp api keys worked.')
+	except Exception as e:
+		print(f'No Serp api keys worked. {e}')
 		try:
 			service = build("customsearch", "v1", developerKey=keys['gsearch']['api_key'])
 			res = service.cse().list(q=query, cx=keys['gsearch']['cse_id'], num=10).execute()
@@ -46,7 +46,7 @@ def serp(query):
 			res = res['items']
 			for i in res:
 				if len(ret) < 10: 
-					ret.append({'link':i['link'],'title':i['title']})
+					ret.append({'api':'gapi','link':i['link'],'title':i['title']})
 		except:
 			print('Google Api Key down')
 			res = search(query, num=10, stop=10, pause=2,user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36")

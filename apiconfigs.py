@@ -1,13 +1,11 @@
 keys = {
 		'gsearch': {
-			'api_key': '',
-			'cse_id': ''
+			'api_key': 'AIzaSyCJZ1eiNM_j7J6gUygIxoz5ePkGD1HcL9Q',
+			'cse_id': 'e7756b68bada4c5e6'
 		},
 
 		'scaleserp': {
 			'keys':[
-				'4E4F6500E5C64E539D7219A7CBF95DC6',
-				'45F573D2EBB54893A5FCB28FC8FBD2E6'
 			]
 		} 
 	}
