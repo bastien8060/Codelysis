@@ -27,7 +27,7 @@ After this you might need to sign in and out (or just re-login):
 $ su -s ${USER}
 ```
 
-Lastly you might want to pre-install the docker image, in order for the first request to be quick, otherwise, it will be slow:
+Lastly you might want to pre-install the docker image, in order for the first request to be quick, otherwise, it will be very slow:
 
 ```sh
 $ docker pull codelysis/linuxalpine
