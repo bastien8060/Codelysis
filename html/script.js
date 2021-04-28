@@ -94,8 +94,8 @@ function checkjob(client_job) {
 }
 
 function analyse() {
-    $(".status-buffer").text()
-    $(".status").text()
+    $(".status-buffer").text("")
+    $(".status").text("")
     $("button").prop("disabled", true);
     $('body').toggleClass('loading')
     results = []
