@@ -1,5 +1,51 @@
-import pty, sys, select, os, subprocess, random, re, pickle
+import pty, sys, select, os, subprocess, random, re, pickle,json,requests
 from googlesearch import search
+from googleapiclient.discovery import build
+
+from apiconfigs import getkeys
+
+keys = getkeys()
+
+def google_search(search_term, api_key, cse_id, **kwargs):
+    service = build("customsearch", "v1", developerKey=api_key)
+    res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
+    return res['items']
+
+def serp(query):
+	ret = []
+	try:
+		received = False
+		attempts = 0
+		for key in keys['scaleserp']['keys']:
+			try:
+				print(f'trying {key}')
+				s = json.loads(requests.get(f'https://api.scaleserp.com/search?api_key={key}&q={query}&hl=en').content.decode())
+				for i in s['organic_results']:
+					ret.append({'title':i['title'],'link':i['link']})
+					received = True
+				return ret
+			except Exception as e:
+				print(f'Dropped Serp api key {attempts} for {e}')
+				attempts += 1
+				pass
+		if received == False:
+			raise Exception('No Serp api keys worked.')
+	except:
+		print('No Serp api keys worked.')
+		try:
+			service = build("customsearch", "v1", developerKey=keys['gsearch']['api_key'])
+			res = service.cse().list(q=query, cx=keys['gsearch']['cse_id'], num=10).execute()
+			res = res['items'][0:10]
+			for i in res:
+				if len(ret) < 10: 
+					ret.append({'link':i['link'],'title':i['title']})
+		except:
+			print('Google Api Key down')
+			res = search(query, num=10, stop=10, pause=2,user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36")
+			for i in res:
+				ret.append({'link':i,'title':i})
+	return ret
+
 
 pty, tty = pty.openpty()
 container = 'codelysis/linuxalpine'
@@ -21,11 +67,11 @@ def getlinks(error,template=0):
 		query = f'python3 "{error}" site:stackoverflow.com'
 	else:
 		query = f'python3 {error} site:{template}'
-	for j in search(query, num=10, stop=10, pause=2):
+	for j in serp(query):
 		results.append(j)
 	if len(results) == 0:
 		query = re.sub('\'[^>]+\'', '', query)
-		for j in search(query, num=10, stop=10, pause=2):
+		for j in serp(query):
 			results.append(j)
 	i = 0
 	return results,query

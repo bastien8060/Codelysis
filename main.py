@@ -1,4 +1,4 @@
-import codelyse,os,json,flask,requests,re,magic
+import codelysis,os,json,flask,requests,re,magic
 from urllib.parse import urlparse
 from flask import request, jsonify, render_template, Response
 from lxml.html import parse
@@ -80,9 +80,9 @@ def api_analyse():
 	#stackoverflow.com
 	#www.programiz.com
 
-	error,trace = codelyse.analyse(code)
+	error,trace = codelysis.analyse(code)
 
-	links,query = codelyse.getlinks(error,template='stackoverflow.com') #1 == accurate
+	links,query = codelysis.getlinks(error,template='stackoverflow.com') #1 == accurate
 
 	broken=None
 	lineno=None
@@ -98,11 +98,18 @@ def api_analyse():
 
 	linksdetails = []
 
-	for i in links:
-		title = get_title(i)
-		url = i
-		source = re.search(":\/\/(.[^/]+).com|.net|.co.uk|.ie|.fr|.co|.org|.gov.edu|.net",url).group(1)
-		linksdetails.append({'title':title,'url':url,'source':source})
+	if links[0]['title'] == '':
+		for i in links:
+			title = get_title(i)
+			url = i
+			source = re.search(":\/\/(.[^/]+).com|.net|.co.uk|.ie|.fr|.co|.org|.gov.edu|.net",url).group(1)
+			linksdetails.append({'title':title,'url':url,'source':source})
+	else:
+		for i in links:
+			title = i['title']
+			url = i['link']
+			source = re.search(":\/\/(.[^/]+).com|.net|.co.uk|.ie|.fr|.co|.org|.gov.edu|.net",url).group(1)
+			linksdetails.append({'title':title,'url':url,'source':source})
 
 	# Use the jsonify function from Flask to convert our list of
 	# Python dictionaries to the JSON format.

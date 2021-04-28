@@ -4,3 +4,4 @@ Flask==1.1.2
 beautifulsoup4==4.9.3
 google==3.0.0
 python-magic==0.4.22
+google-api-python-client==2.2.0
