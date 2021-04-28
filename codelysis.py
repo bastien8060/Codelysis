@@ -120,7 +120,7 @@ def analyse(pythoncode):
 		os.system(f'chmod 777 /tmp/pysess/{sess}/main/run.sh')
 	with open(f"/tmp/pysess/{sess}/output.log", "a") as output:
 		try:
-			subprocess.call(f'bash -c "timeout 180 docker run -w /root --cpus=0.25 -v /tmp/pysess/{sess}/main:/root --ulimit rtprio=19 --memory=300M --cap-add=sys_nice --rm -it {container} /root/run.sh"', shell=True, stdin=tty, stdout=output, stderr=output)
+			subprocess.call(f'bash -c "timeout 180 docker run -w /tmp --cpus=0.25 -v /tmp/pysess/{sess}/main:/tmp --ulimit rtprio=19 --memory=300M --cap-add=sys_nice --rm -it {container} /tmp/run.sh"', shell=True, stdin=tty, stdout=output, stderr=output)
 		except:
 			pass
 		try:
