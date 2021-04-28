@@ -149,4 +149,4 @@ def job_result():
 	future = threads[jobid]
 	return future.result()
 
-app.run()
+app.run(host='0.0.0.0', port=8080)
