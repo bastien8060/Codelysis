@@ -16,18 +16,20 @@ function scroll(aid) {
 
     }
 
-    function analyse() {
-        $("button").prop("disabled", true);
-        $('body').toggleClass('loading')
-        results = []
+
+    function jobresult(){
         $.ajax({
             type: 'GET',
-            url: "/api/v1/analyse",
+            url: "/api/v1/job_result",
             data: {
-                'code': $('textarea').val(),
+                'id': window.jobid,
             },
             success: function(result) {
-                html = '<p class="error-details">Error: <span class="highlight">' + result.error + '</span> on line <span class="highlight">' + result.lineno + '</span></p><br><br><h2 class="gradient-text title bold">Results</h2>'
+                if (result.broken) {
+                  html = '<p class="error-details">Error: <span class="highlight">' + result.error + '</span> on line <span class="highlight">' + result.lineno + '</span></p><br><br><h2 class="gradient-text title bold">Results</h2>'
+                }else{
+                    html = ''
+                }
                 $("#results").css("display", "block");
                 $("#intro").css("display", "none");
                 if (result.broken) {
@@ -50,6 +52,50 @@ function scroll(aid) {
                 $("button").prop("disabled", false);
                 $('body').toggleClass('loading')
                 scroll('#results-anchor')
+
+
+                
             }
         });
     }
+
+
+    function checkjob(client_job){
+        $.ajax({
+            type: 'GET',
+            url: "/api/v1/job_status",
+            data: {
+                'id': window.jobid,
+            },
+            success: function(result) {
+                status = result.status
+                if (status == "Finished"){
+                    clearInterval(client_job);
+                    jobresult()
+                }
+
+
+                
+            }
+        });
+    }
+
+    function analyse() {
+        $("button").prop("disabled", true);
+        $('body').toggleClass('loading')
+        results = []
+        $.ajax({
+            type: 'GET',
+            url: "/api/v1/analyse",
+            data: {
+                'code': $('textarea').val(),
+            },
+            success: function(result) {
+                window.jobid = result.job
+                client_job = 0;
+                client_job = setInterval(function(){checkjob(client_job)},1000);
+            }
+        });
+    }
+
+

@@ -14,18 +14,23 @@ def google_search(search_term, api_key, cse_id, **kwargs):
 def serp(query):
 	ret = []
 	try:
-		received = False
+		received = Falsef
 		attempts = 0
 		for key in keys['scaleserp']['keys']:
 			try:
 				print(f'trying {key}')
 				s = json.loads(requests.get(f'https://api.scaleserp.com/search?api_key={key}&q={query}&hl=en').content.decode())
+				if 'organic_results' not in s:
+					print("0 Results")
+					return []
 				for i in s['organic_results']:
 					ret.append({'title':i['title'],'link':i['link']})
 					received = True
 				return ret
 			except Exception as e:
-				print(f'Dropped Serp api key {attempts} for {e}')
+				print(f'Dropped Serp api key {attempts} for')
+				print(e)
+				print(s)
 				attempts += 1
 				pass
 		if received == False:
@@ -35,7 +40,8 @@ def serp(query):
 		try:
 			service = build("customsearch", "v1", developerKey=keys['gsearch']['api_key'])
 			res = service.cse().list(q=query, cx=keys['gsearch']['cse_id'], num=10).execute()
-			res = res['items'][0:10]
+			#print(res['items'])
+			res = res['items']
 			for i in res:
 				if len(ret) < 10: 
 					ret.append({'link':i['link'],'title':i['title']})
