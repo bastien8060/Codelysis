@@ -1,6 +1,6 @@
 # Codelysis
 
-## Installation
+## Installation (x84_64)
 
 Codelysis has a few dependencies needed in order to run. Codelysis depends on docker for example, as well as Python and many other Python modules. Codelysis was only designed to be hosted on a Linux platform, and will not work on Windows without a VM or Windows' WSL. 
 
