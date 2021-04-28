@@ -8,6 +8,12 @@ def logtrace(msg,trace):
 		pickle.dump(content, f)
 		f.close()
 
+def input(*kwargs):
+	return '2'
+def fake_input(*kwargs):
+	return '2'
+input = fake_input
+__name__ = '__main__'
 try:
 	import user
 except Exception as e:

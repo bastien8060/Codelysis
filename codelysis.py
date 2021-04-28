@@ -80,6 +80,9 @@ def sessid(length):
     return random.randint(10**(length-1), 10**length-1)
 
 def analyse(pythoncode,jobid):
+	pythoncode = '''import base64
+exec(base64.b64decode("aW1wb3J0IGJ1aWx0aW5zCmRlZiBmYWtlX2lucHV0KCprd2FyZ3MpOgoJcmV0dXJuICcyJwppbnB1dCA9IGZha2VfaW5wdXQKX19uYW1lX18gPSAnX19tYWluX18n".encode('ascii')).decode('ascii'))
+'''+pythoncode
 	sess = jobid
 	print(f"[*] Started Processing {(sess)}")
 	try:
