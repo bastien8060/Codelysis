@@ -2,6 +2,7 @@ import pty, sys, select, os, subprocess, random, re, pickle,json,requests
 from pathlib import Path
 from googlesearch import search
 from googleapiclient.discovery import build
+from bs4 import BeautifulSoup
 
 from apiconfigs import getkeys
 
@@ -13,46 +14,36 @@ def google_search(search_term, api_key, cse_id, **kwargs):
     res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
     return res['items']
 
+def get_title(url):
+	page = requests.get(url).content
+	soup = BeautifulSoup(page,features='lxml')
+	return soup.title.string
+
+def googlesearchapi(query):
+	ret = []
+	for apikey in keys['gsearch']:
+		try:
+			service = build("customsearch", "v1", developerKey=apikey['api_key'])
+			res = service.cse().list(q=query, cx=apikey['cse_id'], num=10).execute()
+			if res['searchInformation']['totalResults'] == '0':
+				return []
+			for i in res['items']:
+				ret.append({'api':'gapi','link':i['link'],'title':i['title']})
+			return ret
+		except Exception as e:
+			print(f'\n\n\n{e}\n\n\n')
+	raise Exception('No Google api keys worked.')
+
 def serp(query):
 	ret = []
 	try:
-		received = False
-		attempts = 0
-		for key in keys['scaleserp']['keys']:
-			try:
-				print(f'trying {key}')
-				s = json.loads(requests.get(f'https://api.scaleserp.com/search?api_key={key}&q={query}&hl=en').content.decode())
-				if 'organic_results' not in s:
-					print(f"0 Results for {s}")
-					return []
-				for i in s['organic_results']:
-					ret.append({'api':'scaleserp','title':i['title'],'link':i['link']})
-					received = True
-				return ret
-			except Exception as e:
-				print(f'Dropped Serp api key {attempts} for')
-				print(e)
-				print(s)
-				attempts += 1
-				pass
-		if received == False:
-			raise Exception('No Serp api keys worked.')
+		return googlesearchapi(query)
 	except Exception as e:
-		print(f'No Serp api keys worked. {e}')
-		try:
-			service = build("customsearch", "v1", developerKey=keys['gsearch']['api_key'])
-			res = service.cse().list(q=query, cx=keys['gsearch']['cse_id'], num=10).execute()
-			#print(res['items'])
-			res = res['items']
-			for i in res:
-				if len(ret) < 10: 
-					ret.append({'api':'gapi','link':i['link'],'title':i['title']})
-		except:
-			print('Google Api Key down')
-			res = search(query, num=10, stop=10, pause=2,user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36")
-			for i in res:
-				ret.append({'link':i,'title':i})
-	return ret
+		print(e)
+		res = search(query, num=10, stop=10, pause=2,user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36")
+		for i in res:
+			ret.append({'link':i,'title':get_title(i)})
+		return ret
 
 
 pty, tty = pty.openpty()
