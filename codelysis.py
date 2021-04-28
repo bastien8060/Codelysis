@@ -90,41 +90,41 @@ def analyse(pythoncode):
 	sess = sessid(5)
 	print(sess)
 	try:
-		os.makedirs(f"/tmp/pysess/{sess}/main/") 
+		os.makedirs(f"~/.tmp/pysess/{sess}/main/") 
 	except:
 		pass
-	with open(f'/tmp/pysess/{sess}/main/user.py','w') as f:
+	with open(f'~/.tmp/pysess/{sess}/main/user.py','w') as f:
 		f.write(pythoncode)
 		f.close()
 	try:
 		try:
-			subprocess.run([f"cd /tmp/pysess/{sess}/main/;screen pipreqs"], check = True)
+			subprocess.run([f"cd ~/.tmp/pysess/{sess}/main/;screen pipreqs"], check = True)
 		except subprocess.CalledProcessError:
 			print (f'pipreqs does not exist')
-		requirement_file = open (f'/tmp/pysess/{sess}/main/requirements.txt', 'r' )
+		requirement_file = open (f'~/.tmp/pysess/{sess}/main/requirements.txt', 'r' )
 		content = requirement_file.read()
 		contents = re.sub(r"==.*$", "", content, flags = re.M)
 		print(contents)
 		requirement_file.close()
-		requirement_file = open (f'/tmp/pysess/{sess}/main/requirements.txt', 'w')
+		requirement_file = open (f'~/.tmp/pysess/{sess}/main/requirements.txt', 'w')
 		requirement_file.write(contents)
 		requirement_file.close()
 	except:
 		pass
-	with open(f'/tmp/pysess/{sess}/main/main.py','w') as f:
+	with open(f'~/.tmp/pysess/{sess}/main/main.py','w') as f:
 		f.write(wrapper)
 		f.close()
-	with open(f'/tmp/pysess/{sess}/main/run.sh','w') as f:
+	with open(f'~/.tmp/pysess/{sess}/main/run.sh','w') as f:
 		f.write(run_sh)
 		f.close()
-		os.system(f'chmod 777 /tmp/pysess/{sess}/main/run.sh')
-	with open(f"/tmp/pysess/{sess}/output.log", "a") as output:
+		os.system(f'chmod 777 ~/.tmp/pysess/{sess}/main/run.sh')
+	with open(f"~/.tmp/pysess/{sess}/output.log", "a") as output:
 		try:
-			subprocess.call(f'bash -c "timeout 180 docker run -w /tmp --cpus=0.25 -v /tmp/pysess/{sess}/main:/tmp --ulimit rtprio=19 --memory=300M --cap-add=sys_nice --rm -it {container} /tmp/run.sh"', shell=True, stdin=tty, stdout=output, stderr=output)
+			subprocess.call(f'bash -c "timeout 180 docker run -w /oroot --cpus=0.25 -v ~/.tmp/pysess/{sess}/main/:/oroot --ulimit rtprio=19 --memory=300M --cap-add=sys_nice --rm -it {container} /oroot/run.sh"', shell=True, stdin=tty, stdout=output, stderr=output)
 		except:
 			pass
 		try:
-			trace = pickle.load(open(f'/tmp/pysess/{sess}/main/codelysis-trace.log','rb'))
+			trace = pickle.load(open(f'~/.tmp/pysess/{sess}/main/codelysis-trace.log','rb'))
 			error = trace[0]
 			stacktrace = trace[1]
 
